@@ -4,7 +4,7 @@ package es.ansousa;
  * Hello world!
  *
  */
-public class App 
+public class ReadyCheckBot 
 {
     public static void main( String[] args )
     {
