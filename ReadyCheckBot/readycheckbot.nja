@@ -1,6 +1,0 @@
-{
-  "venv": "", 
-  "name": "ReadyCheckBot", 
-  "license": "GNU General Public License v3", 
-  "description": "Bot for Telegram.\nA simple ready check action."
-}
