@@ -5,6 +5,7 @@ import urllib2
 import re
 
 #This is a new lines
+#This is another new comment for the main.py
 # standard app engine imports
 from google.appengine.api import urlfetch
 from google.appengine.ext import ndb
