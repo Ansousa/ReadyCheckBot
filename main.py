@@ -1,20 +1,16 @@
-import StringIO
 import json
 import logging
-import random
 import urllib
 import urllib2
+import re
 
-# for sending images
-from PIL import Image
-import multipart
-
+#This is a new lines
 # standard app engine imports
 from google.appengine.api import urlfetch
 from google.appengine.ext import ndb
 import webapp2
 
-TOKEN = 'YOUR_BOT_TOKEN_HERE'
+TOKEN = '279618993:AAE2-wl3HOeOEd8RjCiLkIkBP_YLlMAFyFY'
 
 BASE_URL = 'https://api.telegram.org/bot' + TOKEN + '/'
 
@@ -33,6 +29,7 @@ def setEnabled(chat_id, yes):
     es.enabled = yes
     es.put()
 
+
 def getEnabled(chat_id):
     es = EnableStatus.get_by_id(str(chat_id))
     if es:
@@ -45,13 +42,15 @@ def getEnabled(chat_id):
 class MeHandler(webapp2.RequestHandler):
     def get(self):
         urlfetch.set_default_fetch_deadline(60)
-        self.response.write(json.dumps(json.load(urllib2.urlopen(BASE_URL + 'getMe'))))
+        self.response.write(json.dumps(json.load(urllib2.urlopen(
+            BASE_URL + 'getMe'))))
 
 
 class GetUpdatesHandler(webapp2.RequestHandler):
     def get(self):
         urlfetch.set_default_fetch_deadline(60)
-        self.response.write(json.dumps(json.load(urllib2.urlopen(BASE_URL + 'getUpdates'))))
+        self.response.write(json.dumps(json.load(urllib2.urlopen(
+            BASE_URL + 'getUpdates'))))
 
 
 class SetWebhookHandler(webapp2.RequestHandler):
@@ -59,7 +58,8 @@ class SetWebhookHandler(webapp2.RequestHandler):
         urlfetch.set_default_fetch_deadline(60)
         url = self.request.get('url')
         if url:
-            self.response.write(json.dumps(json.load(urllib2.urlopen(BASE_URL + 'setWebhook', urllib.urlencode({'url': url})))))
+            self.response.write(json.dumps(json.load(urllib2.urlopen(
+                BASE_URL + 'setWebhook', urllib.urlencode({'url': url})))))
 
 
 class WebhookHandler(webapp2.RequestHandler):
@@ -88,19 +88,14 @@ class WebhookHandler(webapp2.RequestHandler):
 
         def reply(msg=None, img=None):
             if msg:
-                resp = urllib2.urlopen(BASE_URL + 'sendMessage', urllib.urlencode({
+                resp = urllib2.urlopen(
+                    BASE_URL + 'sendMessage', urllib.parse.urlencode(
+                        {
                     'chat_id': str(chat_id),
                     'text': msg.encode('utf-8'),
                     'disable_web_page_preview': 'true',
                     'reply_to_message_id': str(message_id),
                 })).read()
-            elif img:
-                resp = multipart.post_multipart(BASE_URL + 'sendPhoto', [
-                    ('chat_id', str(chat_id)),
-                    ('reply_to_message_id', str(message_id)),
-                ], [
-                    ('photo', 'image.jpg', img),
-                ])
             else:
                 logging.error('no msg or img specified')
                 resp = None
@@ -115,21 +110,19 @@ class WebhookHandler(webapp2.RequestHandler):
             elif text == '/stop':
                 reply('Bot disabled')
                 setEnabled(chat_id, False)
-            elif text == '/image':
-                img = Image.new('RGB', (512, 512))
-                base = random.randint(0, 16777216)
-                pixels = [base+i*j for i in range(512) for j in range(512)]  # generate sample image
-                img.putdata(pixels)
-                output = StringIO.StringIO()
-                img.save(output, 'JPEG')
-                reply(img=output.getvalue())
+            elif re.match('\/maricon*', text) is not None:
+                nombre = text.split(" ")[1]
+                if nombre == "Sou" or nombre == "Sousas":
+                    reply('Nah, ' + text.split(" ")[1] + ' NO es maricon')
+                else:
+                    reply('Exacto, ' + text.split(" ")[1] + ' es maricon')
             else:
-                reply('What command?')
+                reply('No me se ese comando')
 
         # CUSTOMIZE FROM HERE
-
         elif 'who are you' in text:
-            reply('telebot starter kit, created by yukuku: https://github.com/yukuku/telebot')
+            reply(
+                'telebot starter kit, created by yukuku: https://github.com/yukuku/telebot')
         elif 'what time' in text:
             reply('look at the corner of your screen!')
         else:
@@ -137,7 +130,6 @@ class WebhookHandler(webapp2.RequestHandler):
                 reply('I got your message! (but I do not know how to answer)')
             else:
                 logging.info('not enabled for chat_id {}'.format(chat_id))
-
 
 app = webapp2.WSGIApplication([
     ('/me', MeHandler),
